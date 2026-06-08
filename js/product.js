@@ -1,5 +1,7 @@
 import { addToCart, updateCartCount } from "./utils/common.js";
 
+let currentProduct = null;
+
 let product = {};
 updateCartCount();
 export async function fetchProduct() {
@@ -24,6 +26,7 @@ export async function fetchProduct() {
       alert("존재하지 않는 상품입니다.");
       location.href = "./index.html";
     }
+    currentProduct = product;
     createContent(product);
     createRecommendLists(data.products, product.category, Number(productID));
   } catch (e) {
@@ -35,6 +38,8 @@ export async function fetchProduct() {
 }
 
 function createContent(data) {
+  currentProduct = data;
+
   const title = document.querySelector("#product-title"),
     category = document.querySelector(".product-category"),
     desc = document.querySelector(".product-description"),
@@ -47,7 +52,10 @@ function createContent(data) {
   title.textContent = data.title;
   category.textContent = data.category;
   desc.textContent = data.description;
-  origin_price.textContent = (data.price / (1 - data.discountPercentage / 100)).toFixed(2);
+  origin_price.textContent = (
+    data.price /
+    (1 - data.discountPercentage / 100)
+  ).toFixed(2);
   sale_price.textContent = data.price;
   discount_rate.textContent = data.discountPercentage;
   mainImage.setAttribute("src", data.images[0]);
@@ -56,11 +64,25 @@ function createContent(data) {
 }
 
 //상품 상세 tab
-const detail_tab_menus = "";
-const detail_tab_contents = "";
+const detail_tab_menus = document.querySelectorAll(".detail-tabs a");
+const detail_tab_contents = document.querySelectorAll(
+  ".tab-content .detail-content",
+);
+detail_tab_menus.forEach(menu => {
+  menu.addEventListener("click", e => {
+    e.preventDefault();
+    detail_tab_menus.forEach(b => b.classList.remove("active"));
+    menu.classList.add("active");
+    detail_tab_contents.forEach(c => c.classList.remove("active"));
+    const target = tab.getAttribute("href");
+    document.querySelector(target).classList.add("active");
+  });
+});
 
 function createRecommendLists(all, category, id) {
-  const recommendList = all.filter(p => p.category === category && p.id !== id).slice(0, 4);
+  const recommendList = all
+    .filter(p => p.category === category && p.id !== id)
+    .slice(0, 4);
   const productHTML = recommendList.map(
     p => `
       <article class="product-card">
@@ -92,7 +114,6 @@ fetchProduct();
 //상품 수량 변경하기
 const quantity_control = document.querySelector(".quantity-control");
 const quantity = document.querySelector("#quantity");
-
 quantity_control.addEventListener("click", e => {
   const btn = e.target.closest("button");
   if (!btn) return;
@@ -108,7 +129,14 @@ quantity_control.addEventListener("click", e => {
 });
 
 //장바구니에 담기
-const addcart = document.querySelector("#addcart");
+const addcart = document.querySelector(".purchase-actions .btn-outline");
+
 addcart.addEventListener("click", () => {
-  addToCart(product, Number(quantity.value));
+  addcart(product, Number(quantity.value));
+
+  // if (!currentProduct) return;
+
+  // const qty = Math.max(1, Number(quantity.value) || 1);
+  // addToCart(currentProduct, qty);
+  // updateCartCount();
 });
