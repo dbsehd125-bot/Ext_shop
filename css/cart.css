@@ -88,6 +88,17 @@
   font-weight: 600;
 }
 
+.select-all {
+  cursor: pointer;
+}
+
+.select-all input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #4f46e5;
+}
+
 .cart-list-header button,
 .remove-item,
 .recommend-add {
